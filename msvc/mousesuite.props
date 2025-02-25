@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 The Regents of the University of California -->
+<!-- Authored by David W. Shattuck -->
+<!-- Licensed under LGPL-2.1-only -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <!--debug suffix-->
+    <DebugSuffix Condition="'$(Configuration)'=='Debug'">d</DebugSuffix>
+    <DebugSuffix Condition="'$(Configuration)'!='Debug'">
+    </DebugSuffix>
+    <!--platform-->
+    <ShortPlatform Condition="'$(Platform)' == 'Win32'">x86</ShortPlatform>
+    <ShortPlatform Condition="'$(Platform)' == 'x64'">x64</ShortPlatform>
+    <!--toolset-->
+    <Toolset Condition="'$(PlatformToolset)' == 'v90'">vc90</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v100'">vc100</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v120'">vc120</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v140'">vc140</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v141'">vc141</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v142'">vc142</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v143'">vc143</Toolset>
+    <BST_VERSION>""</BST_VERSION>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>$(SolutionDir)\$(Configuration)\$(Platform)\</OutDir>
+    <_PropertySheetDisplayName>mousesuite</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\;.\zlib-1.2.13;.\vol3d\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RunTimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RunTimeLibrary>
+      <RunTimeLibrary Condition="'$(Configuration)'!='Debug'">MultiThreaded</RunTimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;_UNICODE;UNICODE;ZLIB_WINAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>ZLIB_DLL</UndefinePreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>.\lib\$(Platform)\$(PlatformToolset)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="BST_VERSION">
+      <Value>$(BST_VERSION)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

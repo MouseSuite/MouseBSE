@@ -1,0 +1,113 @@
+name: build MouseBSE
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ] 
+env:
+  RELEASEVERSION: ${{ github.ref_name }}
+  VERSION: 25a
+  PROGRAM: mousebse
+    
+jobs:
+  build:
+    permissions: write-all
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-20.04, macos-latest]
+    runs-on:
+      labels: ["${{ matrix.os }}" ]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+
+# Create names for build packages
+    - name: set MacOS x64 environment variables
+      if: runner.os == 'macOS'
+      run: |
+        echo "Executable=${{ env.PROGRAM }}/${{ env.PROGRAM }}" >> $GITHUB_ENV
+        echo "Package=${{ env.PROGRAM }}_${{ env.RELEASEVERSION }}_build${{ env.BUILD_NO }}_mac_universal.tar.gz" >> $GITHUB_ENV
+
+    - name: set Linux environment variables
+      if: runner.os == 'Linux'
+      run: |
+        echo "Executable=${{ env.PROGRAM }}/${{ env.PROGRAM }}" >> $GITHUB_ENV
+        echo "Package=${{ env.PROGRAM }}_${{ env.RELEASEVERSION }}_build${{ env.BUILD_NO }}_linux.tar.gz" >> $GITHUB_ENV
+
+    - name: set Windows environment variables
+      if: runner.os == 'Windows'
+      run: |
+        echo "Executable=Release\x64\${{ env.PROGRAM }}.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "Package=${{ env.PROGRAM }}_${{ env.RELEASEVERSION }}_build${{ env.BUILD_NO }}_win64.zip" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+# Linux build
+    - name: make
+      if: runner.os == 'Linux'
+      run: |
+        make -j InstallDir=${{ env.PROGRAM }} install
+        tar cvf ${{ env.Package }} ${{ env.PROGRAM }}
+
+# Mac universal binary
+    - name: make MacOS intel64
+      if: runner.os == 'macOS'
+      run: |
+        make -j DEBUG="-target x86_64-apple-macos13" MACHTYPE=x86_64-apple
+
+    - name: make MacOS arm64
+      if: runner.os == 'macOS'
+      run: |
+        make -j DEBUG="-target arm64-apple-macos13" MACHTYPE=arm64-apple
+
+    - name: make Universal Binary
+      if: runner.os == 'macOS'
+      run: |
+        install -d ${{ env.PROGRAM }}        
+        lipo -create -output ${{ env.PROGRAM }}/${{ env.PROGRAM }}${{ env.VERSION }}_apple-universal bin/*/${{ env.PROGRAM }}*
+        cd ${{ env.PROGRAM }}
+        ln -s ${{ env.PROGRAM }}${{ env.VERSION }}_apple-universal ${{ env.PROGRAM }}${{ env.VERSION }}
+        ln -s ${{ env.PROGRAM }}${{ env.VERSION }}_apple-universal ${{ env.PROGRAM }}
+        cd ..
+
+# Windows build - requires Zlib
+    - name: setup MSVC compiler
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Build for Windows
+      if: runner.os == 'Windows'
+      run: |
+        msbuild /m ${{ env.PROGRAM }}.sln /property:Configuration=Release /property:Platform=x64
+
+# next steps are only run if a new release is created: event name == release && event type == created
+
+# package it
+    - name: tar it
+      if: runner.os != 'Windows' && github.event_name == 'release'
+      run: |
+        tar cvf ${{ env.Package }} ${{ env.PROGRAM }}
+    - name: zip it
+      if: runner.os == 'Windows' && github.event_name == 'release'
+      working-directory: Release/x64/
+      run: |
+        Compress-Archive -Path *.exe -DestinationPath ../../${{ env.Package }}
+        
+# Publish Package as a Release
+    - name: Publish ${{ env.Package }}
+      if: github.event_name == 'release'
+      uses: ncipollo/release-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        artifacts: "${{ env.Package }}"
+        tag: ${{ env.RELEASEVERSION }}        
+        allowUpdates: true
+
+
+

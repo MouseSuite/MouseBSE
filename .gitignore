@@ -1,0 +1,31 @@
+obj/*/*
+lib/*/*
+makedep
+*.a
+build/
+bin/*/*
+vol3d/obj/*/vol3d/*
+mousebse/*
+
+# MSVC specifics
+*.ipch
+*.opendb
+*.db*
+*.suo
+*.vsidx
+*.obj
+*.user
+*.tlog
+x64/Release\*
+*.log
+*.recipe
+*.ipdb
+*.iobj
+*.FileListAbsolute.txt
+*.pdb
+*.exe
+
+# Mac
+.DS_Store
+
+

@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 The Regents of the University of California -->
+<!-- Authored by David W. Shattuck -->
+<!-- Licensed under LGPL-2.1-only -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <!--debug suffix-->
+    <DebugSuffix>
+    </DebugSuffix>
+    <DebugSuffix Condition="'$(Configuration)'=='Debug'">d</DebugSuffix>
+    <DebugSuffix Condition="'$(Configuration)'=='DebugMD'">d</DebugSuffix>
+    <!--platform-->
+    <ShortPlatform Condition="'$(Platform)' == 'Win32'">x86</ShortPlatform>
+    <ShortPlatform Condition="'$(Platform)' == 'x64'">x64</ShortPlatform>
+    <!--toolset-->
+    <Toolset Condition="'$(PlatformToolset)' == 'v90'">vc90</Toolset>
+    <Toolset Condition="'$(PlatformToolset)' == 'v100'">vc100</Toolset>
+	  <Toolset Condition="'$(PlatformToolset)' == 'v120'">vc120</Toolset>
+	  <Toolset Condition="'$(PlatformToolset)' == 'v140'">vc140</Toolset>
+	  <Toolset Condition="'$(PlatformToolset)' == 'v141'">vc141</Toolset>
+	  <Toolset Condition="'$(PlatformToolset)' == 'v142'">vc142</Toolset>
+	  <Toolset Condition="'$(PlatformToolset)' == 'v143'">vc143</Toolset>
+    <!-- runtime library -->
+    <RTL Condition="'$(Configuration)'=='Debug'">MTd</RTL>
+    <RTL Condition="'$(Configuration)'=='DebugMD'">MDd</RTL>
+    <RTL Condition="'$(Configuration)'=='Release'">MT</RTL>
+    <RTL Condition="'$(Configuration)'=='ReleaseMD'">MD</RTL>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>..\lib\$(Platform)\$(PlatformToolset)\</OutDir>
+    <TargetName>$(ProjectName)_$(Platform)_$(RTL)</TargetName>
+    <_PropertySheetDisplayName>mousesuite_lib</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <RunTimeLibrary Condition="'$(RTL)'=='MTd'">MultiThreadedDebug</RunTimeLibrary>
+      <RunTimeLibrary Condition="'$(RTL)'=='MT'">MultiThreaded</RunTimeLibrary>
+      <RunTimeLibrary Condition="'$(RTL)'=='MDd'">MultiThreadedDebugDLL</RunTimeLibrary>
+      <RunTimeLibrary Condition="'$(RTL)'=='MD'">MultiThreadedDLL</RunTimeLibrary>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;NOMINMAX;_UNICODE;UNICODE;ZLIB_WINAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>ZLIB_DLL</UndefinePreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link />
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
